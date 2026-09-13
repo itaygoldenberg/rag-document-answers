@@ -1,0 +1,31 @@
+{
+    "name": "rag-12.08",
+    "version": "1.0.0",
+    "description": "RAG service answering questions about the Cybersecurity eBook",
+    "main": "src/app.ts",
+    "scripts": {
+        "start": "nodemon --exec tsx src/app.ts --quiet",
+        "embed": "tsx src/ai/rag-embedding.ts",
+        "build": "tsc"
+    },
+    "author": "Itay Goldenberg",
+    "license": "ISC",
+    "type": "commonjs",
+    "devDependencies": {
+        "@types/cors": "^2.8.19",
+        "@types/express": "^5.0.6",
+        "@types/node": "^26.2.0",
+        "nodemon": "^3.1.14",
+        "tsx": "^4.23.12",
+        "typescript": "^7.0.2"
+    },
+    "dependencies": {
+        "@llamaindex/openai": "^0.4.22",
+        "@llamaindex/readers": "^3.1.21",
+        "axios": "^1.19.0",
+        "cors": "^2.8.6",
+        "dotenv": "^17.4.2",
+        "express": "^5.2.1",
+        "llamaindex": "^0.12.1"
+    }
+}

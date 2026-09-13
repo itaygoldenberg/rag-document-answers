@@ -1,0 +1,802 @@
+/* Two panes: the handbook's own eighteen chapters on one side, the conversation
+   on the other. Everything is written with logical properties, so switching the
+   interface to Hebrew mirrors the whole layout without a second stylesheet. */
+
+.Ask {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 330px) minmax(0, 1fr);
+}
+
+/* ── The handbook ─────────────────────────────────────────── */
+.Ask > div:first-child {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding: clamp(22px, 3vw, 34px) clamp(18px, 2vw, 26px);
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.012) 40%, transparent),
+        rgba(6, 11, 20, 0.62);
+    border-inline-end: 1px solid var(--edge);
+    backdrop-filter: blur(28px) saturate(150%);
+    -webkit-backdrop-filter: blur(28px) saturate(150%);
+    animation: pane 700ms var(--ease) both;
+}
+
+@keyframes pane {
+    from { opacity: 0; transform: translateX(-14px); }
+    to   { opacity: 1; transform: none; }
+}
+
+.Ask[dir="rtl"] > div:first-child {
+    animation-name: pane-rtl;
+}
+
+@keyframes pane-rtl {
+    from { opacity: 0; transform: translateX(14px); }
+    to   { opacity: 1; transform: none; }
+}
+
+.Ask > div:first-child > h1 {
+    position: relative;
+    margin: 0;
+    padding-inline-start: 52px;
+    padding-inline-end: 74px;
+    font-size: 1.14rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+}
+
+.Ask > div:first-child > h1::before {
+    content: "";
+    position: absolute;
+    top: -4px;
+    inset-inline-start: 0;
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background:
+        linear-gradient(150deg, rgba(53, 214, 232, 0.3), rgba(139, 123, 255, 0.28)),
+        rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(53, 214, 232, 0.38);
+    animation: breathe 4.5s ease-in-out infinite;
+}
+
+@keyframes breathe {
+    0%, 100% { box-shadow: 0 0 16px rgba(53, 214, 232, 0.18); }
+    50%      { box-shadow: 0 0 30px rgba(53, 214, 232, 0.42); }
+}
+
+.Ask > div:first-child > h1::after {
+    content: "";
+    position: absolute;
+    top: 5px;
+    inset-inline-start: 9px;
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(150deg, var(--cyan), var(--violet));
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3l7 3v6c0 4.4-3 7.6-7 9-4-1.4-7-4.6-7-9V6z'/%3E%3Cpath d='M9.2 12.2l1.9 1.9 3.7-3.9'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* ── Language switch ──────────────────────────────────────── */
+.Ask > div:first-child > button {
+    position: absolute;
+    top: clamp(20px, 3vw, 32px);
+    inset-inline-end: clamp(18px, 2vw, 26px);
+    padding: 5px 13px;
+    color: var(--text-soft);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--edge);
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 0.74rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 200ms ease, border-color 200ms ease, background-color 200ms ease, transform 200ms var(--ease);
+}
+
+.Ask > div:first-child > button:hover {
+    color: var(--cyan);
+    background: rgba(53, 214, 232, 0.12);
+    border-color: var(--edge-lit);
+    transform: translateY(-1px);
+}
+
+.Ask > div:first-child > button:focus-visible {
+    outline: 2px solid var(--cyan);
+    outline-offset: 2px;
+}
+
+.Ask > div:first-child > p {
+    margin: 16px 0 0;
+    color: var(--muted);
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.05em;
+    line-height: 1.85;
+    text-transform: uppercase;
+}
+
+.Ask[lang="he"] > div:first-child > p {
+    font-family: inherit;
+    font-size: 0.76rem;
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+/* The chapters. Their numbers are the book's own, so the counter carries
+   information rather than decoration. */
+.Ask > div:first-child > div {
+    flex: 1 1 auto;
+    min-height: 0;
+    margin: 20px 0 0;
+    padding: 16px 0 0;
+    border-top: 1px solid var(--edge);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.Ask > div:first-child > div > ol {
+    counter-reset: chapter;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.Ask > div:first-child > div > ol:last-child {
+    margin-top: 18px;
+}
+
+/* The book is in two parts, and each numbers its chapters from one. */
+.Ask > div:first-child > div > ol::before {
+    display: block;
+    margin-bottom: 8px;
+    padding-inline-start: 10px;
+    color: var(--muted);
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.19em;
+}
+
+.Ask > div:first-child > div > ol:first-child::before {
+    content: "PART A · INTRODUCTION";
+}
+
+.Ask > div:first-child > div > ol:last-child::before {
+    content: "PART B · BEST PRACTICES";
+}
+
+.Ask[lang="he"] > div:first-child > div > ol::before {
+    font-family: inherit;
+    font-size: 0.7rem;
+    letter-spacing: normal;
+}
+
+.Ask[lang="he"] > div:first-child > div > ol:first-child::before {
+    content: "חלק א · מבוא";
+}
+
+.Ask[lang="he"] > div:first-child > div > ol:last-child::before {
+    content: "חלק ב · שיטות עבודה מומלצות";
+}
+
+.Ask > div:first-child > div > ol > li {
+    counter-increment: chapter;
+    animation: chapter-in 460ms var(--ease) both;
+}
+
+@keyframes chapter-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: none; }
+}
+
+.Ask > div:first-child > div > ol > li:nth-child(1)  { animation-delay: 60ms; }
+.Ask > div:first-child > div > ol > li:nth-child(2)  { animation-delay: 90ms; }
+.Ask > div:first-child > div > ol > li:nth-child(3)  { animation-delay: 120ms; }
+.Ask > div:first-child > div > ol > li:nth-child(4)  { animation-delay: 150ms; }
+.Ask > div:first-child > div > ol > li:nth-child(5)  { animation-delay: 180ms; }
+.Ask > div:first-child > div > ol > li:nth-child(6)  { animation-delay: 210ms; }
+.Ask > div:first-child > div > ol > li:nth-child(7)  { animation-delay: 240ms; }
+.Ask > div:first-child > div > ol > li:nth-child(8)  { animation-delay: 270ms; }
+.Ask > div:first-child > div > ol > li:nth-child(9)  { animation-delay: 300ms; }
+.Ask > div:first-child > div > ol > li:nth-child(10) { animation-delay: 330ms; }
+.Ask > div:first-child > div > ol > li:nth-child(11) { animation-delay: 360ms; }
+.Ask > div:first-child > div > ol > li:nth-child(12) { animation-delay: 390ms; }
+.Ask > div:first-child > div > ol > li:nth-child(13) { animation-delay: 420ms; }
+.Ask > div:first-child > div > ol > li:nth-child(14) { animation-delay: 450ms; }
+.Ask > div:first-child > div > ol > li:nth-child(15) { animation-delay: 480ms; }
+.Ask > div:first-child > div > ol > li:nth-child(16) { animation-delay: 510ms; }
+.Ask > div:first-child > div > ol > li:nth-child(17) { animation-delay: 540ms; }
+.Ask > div:first-child > div > ol > li:nth-child(18) { animation-delay: 570ms; }
+
+.Ask > div:first-child > div > ol > li > button {
+    position: relative;
+    width: 100%;
+    padding-block: 8px;
+    padding-inline: 40px 10px;
+    color: var(--text-soft);
+    background: none;
+    border: 0;
+    border-radius: 9px;
+    font-family: inherit;
+    font-size: 0.85rem;
+    text-align: start;
+    cursor: pointer;
+    transition: color 180ms ease, background-color 180ms ease, padding-inline-start 200ms var(--ease);
+}
+
+.Ask > div:first-child > div > ol > li > button::before {
+    content: counter(chapter, decimal-leading-zero);
+    position: absolute;
+    inset-inline-start: 10px;
+    color: var(--muted);
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: 0.68rem;
+    font-variant-numeric: tabular-nums;
+    transition: color 180ms ease;
+}
+
+/* A lit bar slides in from the edge on hover, and stays for the open chapter. */
+.Ask > div:first-child > div > ol > li > button::after {
+    content: "";
+    position: absolute;
+    top: 8px;
+    bottom: 8px;
+    inset-inline-start: 0;
+    width: 2px;
+    border-radius: 2px;
+    background: linear-gradient(var(--cyan), var(--violet));
+    transform: scaleY(0);
+    transition: transform 220ms var(--ease);
+}
+
+.Ask > div:first-child > div > ol > li > button:hover {
+    color: var(--text);
+    background: rgba(53, 214, 232, 0.07);
+    padding-inline-start: 44px;
+}
+
+.Ask > div:first-child > div > ol > li > button:hover::before,
+.Ask > div:first-child > div > ol > li > button[data-open]::before {
+    color: var(--cyan);
+}
+
+.Ask > div:first-child > div > ol > li > button:hover::after,
+.Ask > div:first-child > div > ol > li > button[data-open]::after {
+    transform: scaleY(1);
+}
+
+.Ask > div:first-child > div > ol > li > button[data-open] {
+    color: var(--text);
+    background: rgba(53, 214, 232, 0.1);
+    font-weight: 600;
+}
+
+.Ask > div:first-child > div > ol > li > button:focus-visible {
+    outline: 2px solid var(--cyan);
+    outline-offset: -2px;
+}
+
+/* ── The conversation ─────────────────────────────────────── */
+.Ask > div:last-child {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 16px;
+    min-height: 0;
+    padding: clamp(22px, 3vw, 40px) clamp(18px, 4vw, 56px);
+}
+
+.Ask > div:last-child > p {
+    position: relative;
+    margin: 0;
+    padding-block: 20px;
+    padding-inline: 60px 24px;
+    background:
+        linear-gradient(150deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.02) 55%, transparent),
+        rgba(255, 255, 255, 0.028);
+    border: 1px solid var(--edge);
+    border-start-start-radius: 8px;
+    border-start-end-radius: 22px;
+    border-end-end-radius: 22px;
+    border-end-start-radius: 22px;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.09) inset, 0 18px 44px rgba(0, 0, 0, 0.36);
+
+    flex: 0 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+
+    /* The model replies in lines and bullets; without this they collapse into a
+       single run-on paragraph. */
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+
+    font-size: 0.97rem;
+    line-height: 1.75;
+    animation: rise 520ms var(--ease) both;
+}
+
+.Ask > div:last-child > p::before {
+    content: "";
+    position: absolute;
+    top: 21px;
+    inset-inline-start: 21px;
+    width: 22px;
+    height: 22px;
+    background: linear-gradient(150deg, var(--cyan), var(--violet));
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000'%3E%3Cpath d='M12 2.2l1.9 5.4 5.4 1.9-5.4 1.9L12 16.8l-1.9-5.4L4.7 9.5l5.4-1.9z'/%3E%3Cpath d='M18.6 15.1l.9 2.5 2.5.9-2.5.9-.9 2.5-.9-2.5-2.5-.9 2.5-.9z'/%3E%3C/svg%3E") center / contain no-repeat;
+    filter: drop-shadow(0 0 7px rgba(53, 214, 232, 0.55));
+    animation: spark 3.2s ease-in-out infinite;
+}
+
+@keyframes spark {
+    0%, 100% { filter: drop-shadow(0 0 5px rgba(53, 214, 232, 0.4)); }
+    50%      { filter: drop-shadow(0 0 12px rgba(53, 214, 232, 0.8)); }
+}
+
+.Ask > div:last-child > p::after {
+    content: "GROUNDED IN THE HANDBOOK";
+    display: block;
+    margin-top: 16px;
+    padding-top: 13px;
+    border-top: 1px solid var(--edge);
+    color: rgba(53, 214, 232, 0.7);
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: 0.57rem;
+    letter-spacing: 0.17em;
+}
+
+.Ask[lang="he"] > div:last-child > p::after {
+    content: "מבוסס על הספר";
+    font-family: inherit;
+    font-size: 0.7rem;
+    letter-spacing: normal;
+}
+
+@keyframes rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: none; }
+}
+
+/* Suggestion rows: openers before the first question, follow-ups after one. */
+.Ask > div:last-child > div,
+.Ask > div:last-child > section {
+    flex: 0 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    animation: rise 460ms var(--ease) both;
+}
+
+.Ask > div:last-child > div::before {
+    flex: 1 1 100%;
+    content: "TRY ASKING";
+    color: var(--muted);
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.19em;
+}
+
+.Ask[lang="he"] > div:last-child > div::before {
+    content: "אפשר לשאול";
+    font-family: inherit;
+    font-size: 0.72rem;
+    letter-spacing: normal;
+}
+
+.Ask > div:last-child > div > button,
+.Ask > div:last-child > section > button {
+    padding: 8px 15px;
+    color: var(--text-soft);
+    background: rgba(255, 255, 255, 0.045);
+    border: 1px solid var(--edge);
+    border-radius: 999px;
+    font-family: inherit;
+    font-size: 0.83rem;
+    font-weight: 500;
+    text-align: start;
+    cursor: pointer;
+    animation: rise 400ms var(--ease) both;
+    transition: color 200ms ease, border-color 200ms ease, background-color 200ms ease, transform 200ms var(--ease);
+}
+
+.Ask > div:last-child > div > button:nth-child(2),
+.Ask > div:last-child > section > button:nth-child(1) { animation-delay: 60ms; }
+.Ask > div:last-child > div > button:nth-child(3),
+.Ask > div:last-child > section > button:nth-child(2) { animation-delay: 130ms; }
+.Ask > div:last-child > div > button:nth-child(4),
+.Ask > div:last-child > section > button:nth-child(3) { animation-delay: 200ms; }
+
+.Ask > div:last-child > div > button:hover:not(:disabled),
+.Ask > div:last-child > section > button:hover:not(:disabled) {
+    color: var(--text);
+    background: rgba(53, 214, 232, 0.11);
+    border-color: var(--edge-lit);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(53, 214, 232, 0.14);
+}
+
+.Ask > div:last-child > div > button:focus-visible,
+.Ask > div:last-child > section > button:focus-visible {
+    outline: 2px solid var(--cyan);
+    outline-offset: 2px;
+}
+
+/* The two AI triggers: first pill in the openers row, only pill in the
+   follow-ups row. */
+.Ask > div:last-child > div > button:first-of-type,
+.Ask > div:last-child > section > button:only-child {
+    position: relative;
+    padding-inline-start: 38px;
+    color: var(--cyan);
+    background: rgba(53, 214, 232, 0.08);
+    border-color: rgba(53, 214, 232, 0.3);
+    border-style: dashed;
+}
+
+.Ask > div:last-child > div > button:first-of-type::before,
+.Ask > div:last-child > section > button:only-child::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    inset-inline-start: 14px;
+    width: 16px;
+    height: 16px;
+    background: currentColor;
+    transform: translateY(-50%);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23000'%3E%3Cpath d='M12 2.2l1.9 5.4 5.4 1.9-5.4 1.9L12 16.8l-1.9-5.4L4.7 9.5l5.4-1.9z'/%3E%3Cpath d='M18.6 15.1l.9 2.5 2.5.9-2.5.9-.9 2.5-.9-2.5-2.5-.9 2.5-.9z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.Ask > div:last-child > div > button:first-of-type:disabled,
+.Ask > div:last-child > section > button:only-child:disabled {
+    cursor: wait;
+    animation: working 1.5s ease-in-out infinite;
+}
+
+@keyframes working {
+    0%, 100% { opacity: 0.5; }
+    50%      { opacity: 1; }
+}
+
+/* Angles and lengths cannot be animated inside a gradient unless the browser
+   is told their type, so each moving value is registered first. */
+@property --sweep  { syntax: "<angle>";  inherits: false; initial-value: 0deg; }
+@property --ping   { syntax: "<number>"; inherits: false; initial-value: 4; }
+@property --ping-a { syntax: "<number>"; inherits: false; initial-value: 0; }
+@property --blip-a { syntax: "<number>"; inherits: false; initial-value: 0; }
+@property --blip-b { syntax: "<number>"; inherits: false; initial-value: 0; }
+@property --blip-c { syntax: "<number>"; inherits: false; initial-value: 0; }
+
+/* Nothing asked yet: a radar sweeps the space the answer will fill, and three
+   contacts light up as the beam reaches them. ::before is free here because the
+   skeleton it usually carries only appears while a question is in flight, and
+   the two states never overlap. */
+.Ask > div:last-child::after {
+    content: none;
+}
+
+.Ask:not(:has(> div:last-child > p)):not(:has(form > button:disabled)) > div:last-child::before {
+    content: "";
+    order: -3;
+    flex: 1 1 auto;
+    min-height: 210px;
+
+    --dial: min(44vh, 400px);
+
+    background-image:
+        /* the leading edge of the beam, brighter than the wedge behind it */
+        conic-gradient(from var(--sweep), rgba(160, 248, 255, 0.95) 0 1.4deg, transparent 1.4deg),
+        /* the beam itself, fading out behind the edge */
+        conic-gradient(from var(--sweep), rgba(53, 214, 232, 0.42), rgba(53, 214, 232, 0) 72deg, transparent 360deg),
+        /* three contacts, each lit as the beam passes over it */
+        radial-gradient(circle, rgb(160 248 255 / var(--blip-a)) 0 32%, transparent 62%),
+        radial-gradient(circle, rgb(139 123 255 / var(--blip-b)) 0 32%, transparent 62%),
+        radial-gradient(circle, rgb(53 232 176 / var(--blip-c)) 0 32%, transparent 62%),
+        /* a ping expanding out of the centre */
+        radial-gradient(circle,
+            transparent 0 calc(var(--ping) * 1%),
+            rgb(53 214 232 / var(--ping-a)) calc(var(--ping) * 1%) calc(var(--ping) * 1% + 0.5%),
+            transparent calc(var(--ping) * 1% + 1.4%)),
+        /* crosshairs */
+        linear-gradient(rgba(53, 214, 232, 0.1) 0 0),
+        linear-gradient(rgba(53, 214, 232, 0.1) 0 0),
+        /* range rings */
+        radial-gradient(circle, transparent 0 45%, rgba(53, 214, 232, 0.2) 45% 45.4%, transparent 46%),
+        radial-gradient(circle, transparent 0 30%, rgba(53, 214, 232, 0.14) 30% 30.5%, transparent 31%),
+        radial-gradient(circle, transparent 0 15%, rgba(53, 214, 232, 0.12) 15% 15.7%, transparent 16%),
+        /* the dish */
+        radial-gradient(circle, rgba(53, 214, 232, 0.7) 0 1.3%, transparent 2%);
+
+    background-repeat: no-repeat;
+    background-position:
+        center, center,
+        52% 45%, 47.6% 54.5%, 51.6% 53.4%,
+        center,
+        center, center,
+        center, center, center,
+        center;
+    background-size:
+        var(--dial) var(--dial),
+        var(--dial) var(--dial),
+        14px 14px, 12px 12px, 11px 11px,
+        var(--dial) var(--dial),
+        var(--dial) 1px, 1px var(--dial),
+        var(--dial) var(--dial), var(--dial) var(--dial), var(--dial) var(--dial),
+        var(--dial) var(--dial);
+
+    mask-image: radial-gradient(circle, #000 0 45%, transparent 46.5%);
+    mask-size: var(--dial) var(--dial);
+    mask-position: center;
+    mask-repeat: no-repeat;
+
+    filter: drop-shadow(0 0 26px rgba(53, 214, 232, 0.16));
+
+    animation:
+        radar 4.8s linear infinite,
+        ping 3.2s ease-out infinite,
+        blip-a 4.8s ease-out infinite -0.6s,
+        blip-b 4.8s ease-out infinite -3.1s,
+        blip-c 4.8s ease-out infinite -2.0s,
+        rise 800ms var(--ease) both;
+}
+
+@keyframes radar {
+    to { --sweep: 360deg; }
+}
+
+@keyframes ping {
+    0%       { --ping: 3;  --ping-a: 0.55; }
+    70%, 100% { --ping: 45; --ping-a: 0; }
+}
+
+/* A contact flares the moment the beam crosses it, then decays. */
+@keyframes blip-a {
+    0%       { --blip-a: 0.95; }
+    26%, 100% { --blip-a: 0; }
+}
+
+@keyframes blip-b {
+    0%       { --blip-b: 0.85; }
+    26%, 100% { --blip-b: 0; }
+}
+
+@keyframes blip-c {
+    0%       { --blip-c: 0.8; }
+    26%, 100% { --blip-c: 0; }
+}
+
+/* The caption sits below the dial. */
+.Ask:not(:has(> div:last-child > p)):not(:has(form > button:disabled)) > div:last-child::after {
+    content: "Answers are drawn from the handbook, never invented.";
+    order: -2;
+    flex: 0 0 auto;
+    padding-bottom: 8px;
+    color: rgba(111, 129, 154, 0.65);
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.13em;
+    text-align: center;
+    animation: rise 800ms var(--ease) both;
+}
+
+.Ask[lang="he"]:not(:has(> div:last-child > p)):not(:has(form > button:disabled)) > div:last-child::after {
+    content: "כל התשובות נשענות על הספר, אף אחת לא מומצאת.";
+    font-family: inherit;
+    font-size: 0.8rem;
+    letter-spacing: normal;
+}
+
+/* While the model is picking questions, the pills that are about to be replaced
+   step back so the wait is visible. */
+.Ask > div:last-child > div:has(> button:first-of-type:disabled) > button:not(:first-of-type) {
+    opacity: 0.3;
+    animation: working 1.2s ease-in-out infinite;
+}
+
+/* Skeleton, shown only while the composer button is disabled. */
+.Ask > div:last-child::before {
+    content: none;
+}
+
+.Ask:has(form > button:disabled) > div:last-child::before {
+    content: "";
+    order: -1;
+    flex: 0 0 auto;
+    height: 168px;
+    border: 1px solid var(--edge);
+    border-start-start-radius: 8px;
+    border-start-end-radius: 22px;
+    border-end-end-radius: 22px;
+    border-end-start-radius: 22px;
+
+    background-color: rgba(255, 255, 255, 0.028);
+    background-image:
+        linear-gradient(90deg, transparent, rgba(53, 214, 232, 0.16) 45%, transparent 78%),
+        linear-gradient(rgba(168, 205, 255, 0.14) 0 0),
+        linear-gradient(rgba(168, 205, 255, 0.14) 0 0),
+        linear-gradient(rgba(168, 205, 255, 0.14) 0 0),
+        linear-gradient(rgba(168, 205, 255, 0.14) 0 0);
+    background-repeat: no-repeat;
+    background-size: 55% 100%, 82% 11px, 68% 11px, 76% 11px, 38% 11px;
+    background-position: -60% 0, 60px 30px, 24px 62px, 24px 94px, 24px 126px;
+    animation: sweep 1.5s linear infinite;
+}
+
+@keyframes sweep {
+    to { background-position: 170% 0, 60px 30px, 24px 62px, 24px 94px, 24px 126px; }
+}
+
+/* ── Composer ─────────────────────────────────────────────── */
+.Ask > div:last-child > form {
+    flex: 0 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-block: 9px;
+    padding-inline: 18px 9px;
+    background:
+        linear-gradient(150deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.028) 60%, transparent),
+        rgba(6, 11, 20, 0.6);
+    border: 1px solid rgba(168, 205, 255, 0.16);
+    border-radius: 18px;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.12) inset, 0 18px 40px rgba(0, 0, 0, 0.4);
+    transition: border-color 240ms ease, box-shadow 240ms ease;
+}
+
+.Ask > div:last-child > form:focus-within {
+    border-color: var(--edge-lit);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.14) inset,
+        0 18px 40px rgba(0, 0, 0, 0.44),
+        0 0 0 4px rgba(53, 214, 232, 0.12),
+        0 0 40px rgba(53, 214, 232, 0.18);
+}
+
+.Ask > div:last-child > form > input {
+    flex: 1 1 240px;
+    min-width: 0;
+    padding: 12px 2px;
+    color: var(--text);
+    background: transparent;
+    border: 0;
+    font-family: inherit;
+    font-size: 1rem;
+}
+
+.Ask > div:last-child > form > input::placeholder {
+    color: rgba(111, 129, 154, 0.9);
+}
+
+.Ask > div:last-child > form > input:focus {
+    outline: none;
+}
+
+.Ask > div:last-child > form > button {
+    position: relative;
+    flex: 0 0 auto;
+    min-width: 136px;
+    min-height: 48px;
+    padding-block: 0;
+    padding-inline: 46px 22px;
+    color: #03202a;
+    background: linear-gradient(140deg, var(--cyan), #5ce0d2 55%, var(--violet));
+    border: 0;
+    border-radius: 13px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.42) inset, 0 12px 32px rgba(53, 214, 232, 0.3);
+    transition: transform 200ms var(--ease), box-shadow 200ms ease, filter 200ms ease;
+}
+
+.Ask > div:last-child > form > button::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    inset-inline-start: 18px;
+    width: 18px;
+    height: 18px;
+    background: #03202a;
+    transform: translateY(-50%);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21.5 2.5L11 13'/%3E%3Cpath d='M21.5 2.5l-6.8 19-3.7-8.5-8.5-3.7z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* The plane must point the way the text runs. */
+.Ask[dir="rtl"] > div:last-child > form > button::before {
+    transform: translateY(-50%) scaleX(-1);
+}
+
+.Ask > div:last-child > form > button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    filter: brightness(1.07);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.48) inset, 0 16px 38px rgba(53, 214, 232, 0.45);
+}
+
+.Ask > div:last-child > form > button:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.Ask > div:last-child > form > button:focus-visible {
+    outline: 2px solid var(--cyan);
+    outline-offset: 3px;
+}
+
+.Ask > div:last-child > form > button:disabled {
+    cursor: wait;
+    color: rgba(3, 32, 42, 0.75);
+    background: linear-gradient(140deg, rgba(53, 214, 232, 0.55), rgba(139, 123, 255, 0.5));
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.28) inset;
+}
+
+.Ask > div:last-child > form > button:disabled::before {
+    background: none;
+    mask: none;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(3, 32, 42, 0.3);
+    border-top-color: #03202a;
+    border-radius: 50%;
+    animation: spin 700ms linear infinite;
+}
+
+.Ask[dir="rtl"] > div:last-child > form > button:disabled::before {
+    transform: translateY(-50%);
+}
+
+@keyframes spin {
+    to { transform: translateY(-50%) rotate(360deg); }
+}
+
+/* ── Scrollbars ───────────────────────────────────────────── */
+.Ask > div:first-child > div::-webkit-scrollbar,
+.Ask > div:last-child > p::-webkit-scrollbar {
+    width: 8px;
+}
+
+.Ask > div:first-child > div::-webkit-scrollbar-thumb,
+.Ask > div:last-child > p::-webkit-scrollbar-thumb {
+    background: rgba(168, 205, 255, 0.18);
+    border-radius: 99px;
+}
+
+@media (max-width: 900px) {
+    .Ask {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto minmax(0, 1fr);
+    }
+
+    .Ask > div:first-child {
+        border-inline-end: 0;
+        border-bottom: 1px solid var(--edge);
+        max-height: 34svh;
+    }
+}
+
+@media (max-width: 560px) {
+    .Ask > div:last-child > form > button {
+        flex: 1 1 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .Ask > div:first-child,
+    .Ask > div:first-child > h1::before,
+    .Ask > div:first-child > div > ol > li,
+    .Ask > div:last-child > p,
+    .Ask > div:last-child > p::before,
+    .Ask > div:last-child > div,
+    .Ask > div:last-child > div > button,
+    .Ask > div:last-child > section,
+    .Ask > div:last-child > section > button,
+    .Ask > div:last-child::after,
+    .Ask:has(form > button:disabled) > div:last-child::before,
+    .Ask > div:last-child > form > button:disabled::before {
+        animation: none;
+    }
+}

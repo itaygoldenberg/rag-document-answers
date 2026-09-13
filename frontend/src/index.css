@@ -1,0 +1,76 @@
+/* A security console at night. One committed visual world, every colour painted
+   explicitly so the page holds on any host background. */
+
+:root {
+    --void: #05070d;
+    --deep: #080d17;
+    --panel: #0c1320;
+
+    --cyan: #35d6e8;
+    --violet: #8b7bff;
+    --mint: #35e8b0;
+
+    --text: #e9f1fb;
+    --text-soft: #b0c2d9;
+    --muted: #6f819a;
+
+    --edge: rgba(168, 205, 255, 0.11);
+    --edge-lit: rgba(53, 214, 232, 0.42);
+
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+    color-scheme: dark;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    margin: 0;
+    color: var(--text);
+    background: var(--void);
+    font-family: "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+}
+
+/* Aurora — slow light behind everything, so the dark never reads as flat. */
+body::before {
+    content: "";
+    position: fixed;
+    inset: -25%;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(36% 30% at 14% 16%, rgba(53, 214, 232, 0.22), transparent 70%),
+        radial-gradient(32% 28% at 88% 18%, rgba(139, 123, 255, 0.2), transparent 70%),
+        radial-gradient(40% 32% at 66% 94%, rgba(53, 232, 176, 0.12), transparent 72%),
+        var(--deep);
+    filter: blur(30px);
+    animation: drift 30s ease-in-out infinite alternate;
+}
+
+@keyframes drift {
+    from { transform: translate3d(-2%, -1%, 0) scale(1); }
+    to   { transform: translate3d(2%, 2%, 0) scale(1.07); }
+}
+
+#root {
+    position: relative;
+    z-index: 1;
+    display: flex;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body::before { animation: none; }
+}
