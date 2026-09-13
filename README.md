@@ -1,143 +1,164 @@
 <p align="center">
-  <img src="./docs/readme-banner.svg" alt="RAG animated project banner" width="100%" />
+  <img src="./docs/readme-banner.svg" alt="RAG Document Answers project banner" width="100%" />
 </p>
 
 <p align="center">
-  <a href="#running-it"><img src="./docs/actions/run.svg" alt="Run RAG locally" width="250" /></a>
-  <a href="https://github.com/itaygoldenberg/rag-document-answers"><img src="./docs/actions/source.svg" alt="View the RAG source" width="250" /></a>
-  <a href="https://github.com/itaygoldenberg?tab=repositories"><img src="./docs/actions/github.svg" alt="More projects by Itay Goldenberg" width="250" /></a>
-  <a href="https://www.linkedin.com/in/itay-goldenberg/"><img src="./docs/actions/linkedin.svg" alt="Connect with Itay Goldenberg on LinkedIn" width="250" /></a>
+  <a href="#running-locally"><img src="./docs/actions/run.svg" alt="Run locally" width="250" /></a>
+  <a href="https://github.com/itaygoldenberg/rag-document-answers"><img src="./docs/actions/source.svg" alt="View source" width="250" /></a>
+  <a href="https://github.com/itaygoldenberg?tab=repositories"><img src="./docs/actions/github.svg" alt="More projects" width="250" /></a>
+  <a href="https://www.linkedin.com/in/itay-goldenberg/"><img src="./docs/actions/linkedin.svg" alt="LinkedIn" width="250" /></a>
 </p>
-
-> [!NOTE]
-> Retrieval-Augmented Generation: the model answers from documents you supply, and only from those.
 
 <p align="center">
   <a href="#overview">Overview</a>&nbsp;&middot;&nbsp;
   <a href="#features">Features</a>&nbsp;&middot;&nbsp;
+  <a href="#workflow">Workflow</a>&nbsp;&middot;&nbsp;
   <a href="#technology">Technology</a>&nbsp;&middot;&nbsp;
-  <a href="#project-structure">Project structure</a>&nbsp;&middot;&nbsp;
-  <a href="#running-it">Running it</a>&nbsp;&middot;&nbsp;
-  <a href="#notes">Notes</a>
+  <a href="#running-locally">Running locally</a>
 </p>
+
+> [!NOTE]
+> A full-stack course portfolio project by Itay Goldenberg. Retrieve passages from local documents before generating an answer.
 
 ## Overview
 
-A language model answers from what it was trained on. Ask it about a document it has never seen and it will either refuse or invent something plausible. RAG closes that gap by finding the relevant passages first and putting them into the prompt as context.
+RAG Document Answers combines an Express API, a React question interface and a local LlamaIndex vector store. An indexing command reads documents, creates overlapping chunks and persists embeddings. At question time the API retrieves relevant passages and sends them to OpenAI as context.
 
-The indexing step is separate and deliberate. `npm run embed` reads the documents, splits them, turns each chunk into a vector and writes a local store. At request time the question is embedded the same way, the nearest chunks come back, and only those go to the model.
+The answer response includes both the generated answer and the retrieved chunks, making the supporting material available to the client. The prompt instructs the model to say it does not know when the documents lack the answer; this is an instruction rather than a factual guarantee.
+
+<table><tr><td align="center" width="25%"><strong>512 / 128</strong><br /><sub>chunk size / overlap</sub></td><td align="center" width="25%"><strong>TOP 4</strong><br /><sub>retrieved results</sub></td><td align="center" width="25%"><strong>EXPRESS</strong><br /><sub>three POST routes</sub></td><td align="center" width="25%"><strong>REACT</strong><br /><sub>question interface</sub></td></tr></table>
 
 | Project detail | Implementation |
 |---|---|
-| Indexing | `npm run embed` reads `src/assets/docs`, writes `src/assets/vector-db` |
-| Retrieval | Question embedded, nearest chunks returned by distance |
-| Generation | The retrieved chunks become the context of the prompt |
-| Backend | Express and TypeScript |
-| Frontend | React and Vite, asks and displays |
-| Library | LlamaIndex with OpenAI embeddings |
+| LlamaIndex | Document reading, chunking, embedding and retrieval |
+| OpenAI | Embedding and answer generation |
+| Express + TypeScript | Index, retrieval and answer endpoints |
+| React + Axios + Vite | Question interface and API requests |
 
 ## Contents
 
 - [Overview](#overview)
 - [Features](#features)
+- [Workflow](#workflow)
 - [Technology](#technology)
 - [Project structure](#project-structure)
-- [Running it](#running-it)
-- [Notes](#notes)
+- [Running locally](#running-locally)
+- [Checks](#checks)
+- [Additional details](#additional-details)
+- [Operational notes](#operational-notes)
+- [Author](#author)
 
 ## Features
 
-### Answers grounded in your documents
+### Separate indexing step
 
-The model is given the passages that matched, so the answer comes from the source rather than from memory. Ask about something that is not in the documents and it has nothing to draw on.
+`npm run embed` reads `backend/src/assets/docs` and persists a local store under `backend/src/assets/vector-db`.
 
-### Meaning, not keywords
+### Semantic retrieval
 
-Embedding turns text into a list of numbers positioned so that similar meanings sit close together. Finding relevant text becomes a distance calculation, which is why a question worded differently from the document still finds it.
+The retriever embeds the question and requests four results, including chunk text and similarity scores.
 
-### Indexing is a separate step
+### Context-based generation
 
-Building the vector store is slow and costs tokens, so it runs once with `npm run embed` and not on every question. Change the documents and run it again.
+The answer route supplies retrieved passages in the system prompt and returns `{answer, chunks}`.
 
-### A generated store, not a committed one
+### Inspectable retrieval API
 
-`src/assets/vector-db` is produced from the documents and stays out of the repository. The documents are the source of truth.
+A separate chunks endpoint lets callers inspect retrieval without asking for a generated answer.
+
+## Workflow
+
+<p align="center">
+  <img src="./docs/workflow.svg" alt="LOCAL DOCUMENTS → VECTOR STORE → QUESTION RETRIEVAL → CONTEXT + ANSWER" width="100%" />
+</p>
+
+1. **LOCAL DOCUMENTS:** Read source files and split into chunks.
+2. **VECTOR STORE:** Persist embeddings with LlamaIndex.
+3. **QUESTION RETRIEVAL:** Find the top four matching passages.
+4. **CONTEXT + ANSWER:** Send passages to GPT return answer + chunks.
 
 ## Technology
 
 <p align="center">
-  <img src="./docs/tech-strip.svg" alt="RAG technologies" width="100%" />
+  <img src="./docs/tech-strip.svg" alt="RAG Document Answers technology stack" width="100%" />
 </p>
 
 | Technology | Role |
 |---|---|
-| LlamaIndex | Chunking, embedding and the vector store |
-| OpenAI | Embeddings and the answer |
-| TypeScript | Backend and frontend |
-| Node.js + Express | The API |
-| Axios | HTTP client |
-| React + Vite | The client |
+| LlamaIndex | Document reading, chunking, embedding and retrieval |
+| OpenAI | Embedding and answer generation |
+| Express + TypeScript | Index, retrieval and answer endpoints |
+| React + Axios + Vite | Question interface and API requests |
 
 ## Project structure
 
 ```text
-RAG/
-|-- backend/
-|   |-- src/ai/              indexing and retrieval
-|   |-- src/assets/
-|   |   |-- docs/            the source documents
-|   |   `-- vector-db/       generated by npm run embed, not committed
-|   |-- src/controllers/
-|   `-- src/services/
-|-- frontend/                asks the question, shows the answer
-`-- docs/                    README artwork only
+backend/src/ai/               Indexing and retrieval
+backend/src/assets/docs/      Source documents
+backend/src/assets/vector-db/ Generated local store (ignored)
+backend/src/controllers/      Index, chunks and answer routes
+frontend/src/                 React question interface
+docs/                         README artwork
 ```
 
-## Running it
+## Running locally
+
+Clone the repository, then follow the application-specific steps below. Commands assume the repository root unless a directory change is shown.
+
+```bash
+git clone https://github.com/itaygoldenberg/rag-document-answers.git
+cd rag-document-answers
+```
 
 ```bash
 cd backend
 ```
 
+Copy `.env.example` to `.env` in this application directory and configure it before starting:
+
+```env
+OPENAI_API_KEY=your_openai_api_key
+PORT=4300
+```
+
+Place the documents to index in `src/assets/docs`, then run:
+
 ```bash
 npm install
-```
-
-Build the vector store once, before the first question:
-
-```bash
 npm run embed
-```
-
-```bash
 npm start
 ```
 
-Then, in a second terminal:
+In a second terminal, starting from the repository root:
 
 ```bash
 cd frontend
 ```
 
 ```bash
+npm install
 npm run dev
 ```
 
-## Environment
+Open the local address printed by Vite. The frontend targets `http://localhost:4300`. Wait for the backend to finish loading its vector store before sending a question.
 
-Copy `.env.example` to `.env` and fill in your own values:
+## Checks
 
-```env
-OPENAI_API_KEY=your_openai_api_key
-```
+Run `npm run build` separately in `backend` and `frontend`. After indexing, ask a question covered by a document and inspect the returned chunks; then ask one outside the corpus and inspect the model response. These manual checks require API access.
 
-`.env` is ignored by git. A key that reaches GitHub is public from the moment it is pushed.
+These are available build commands and suggested manual checks, not a claim that a full integration test suite is included.
 
-## Notes
+## Additional details
 
-- `npm run embed` has to run before the first question. Without a vector store there is nothing to retrieve, and the answer route fails rather than guessing.
-- Re-run it after changing anything under `src/assets/docs`. The store is a snapshot, not a live view.
-- How many chunks are retrieved is a trade-off: too few and the answer misses context, too many and the important passage is diluted.
+| Method | Route | Purpose |
+|---|---|---|
+| POST | `/api/vector-db` | Rebuild the local index |
+| POST | `/api/chunks` | Retrieve chunks for `{ "question": "..." }` |
+| POST | `/api/ask` | Return answer and chunks for the same body |
+
+## Operational notes
+
+Indexing and questions use OpenAI API calls. Rebuild after changing source documents and restart the backend so its in-memory retriever reloads the store. The vector store is generated and ignored by Git. Keep the index route local unless access control is added; retrieved context improves grounding but does not guarantee correct answers.
 
 ## Author
 
@@ -148,5 +169,5 @@ OPENAI_API_KEY=your_openai_api_key
 
 <p align="center">
   <a href="https://github.com/itaygoldenberg"><img src="./docs/actions/github.svg" alt="Itay Goldenberg on GitHub" width="250" /></a>
-  <a href="https://www.linkedin.com/in/itay-goldenberg/"><img src="./docs/actions/linkedin.svg" alt="Itay Goldenberg on LinkedIn" width="250" /></a>
+  <a href="https://www.linkedin.com/in/itay-goldenberg/"><img src="./docs/actions/linkedin.svg" alt="Connect on LinkedIn" width="250" /></a>
 </p>
