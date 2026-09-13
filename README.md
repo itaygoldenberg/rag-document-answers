@@ -1,46 +1,96 @@
-<h1 align="center">RAG</h1>
-
-<p align="center"><em>Answers questions from your own documents, not from the model's memory.</em></p>
-
 <p align="center">
-<img src="https://img.shields.io/badge/LlamaIndex-000000?style=for-the-badge&logo=chainlink&logoColor=white" alt="LlamaIndex" />
-<img src="https://img.shields.io/badge/OpenAI-412991?style=for-the-badge&logo=openai&logoColor=white" alt="OpenAI" />
-<img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
-<img src="https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express&logoColor=white" alt="Express" />
-<img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=white" alt="React" />
+  <img src="./docs/readme-banner.svg" alt="RAG animated project banner" width="100%" />
 </p>
 
----
-## The problem it solves
+<p align="center">
+  <a href="#running-it"><img src="./docs/actions/run.svg" alt="Run RAG locally" width="250" /></a>
+  <a href="https://github.com/itaygoldenberg/rag-document-answers"><img src="./docs/actions/source.svg" alt="View the RAG source" width="250" /></a>
+  <a href="https://github.com/itaygoldenberg?tab=repositories"><img src="./docs/actions/github.svg" alt="More projects by Itay Goldenberg" width="250" /></a>
+  <a href="https://www.linkedin.com/in/itay-goldenberg/"><img src="./docs/actions/linkedin.svg" alt="Connect with Itay Goldenberg on LinkedIn" width="250" /></a>
+</p>
 
-A language model answers from what it was trained on. Ask it about a document it has never seen and it will either refuse or invent one. Retrieval-Augmented Generation fixes that by finding the relevant passages first and handing them to the model as context.
+> [!NOTE]
+> Retrieval-Augmented Generation: the model answers from documents you supply, and only from those.
 
-## How it works
+<p align="center">
+  <a href="#overview">Overview</a>&nbsp;&middot;&nbsp;
+  <a href="#features">Features</a>&nbsp;&middot;&nbsp;
+  <a href="#technology">Technology</a>&nbsp;&middot;&nbsp;
+  <a href="#project-structure">Project structure</a>&nbsp;&middot;&nbsp;
+  <a href="#running-it">Running it</a>&nbsp;&middot;&nbsp;
+  <a href="#notes">Notes</a>
+</p>
 
-```text
-documents  -->  chunks  -->  embeddings  -->  vector store
-                                                   |
-question  -->  embedding  -->  nearest chunks  -----+-->  prompt  -->  answer
-```
+## Overview
 
-| Step | Where |
+A language model answers from what it was trained on. Ask it about a document it has never seen and it will either refuse or invent something plausible. RAG closes that gap by finding the relevant passages first and putting them into the prompt as context.
+
+The indexing step is separate and deliberate. `npm run embed` reads the documents, splits them, turns each chunk into a vector and writes a local store. At request time the question is embedded the same way, the nearest chunks come back, and only those go to the model.
+
+| Project detail | Implementation |
 |---|---|
-| Split the documents and embed them | `npm run embed` reads `src/assets/docs` and writes `src/assets/vector-db` |
-| Embed the question and find the closest chunks | retrieval, at request time |
-| Put those chunks in the prompt and ask | the answer draws only on what was retrieved |
+| Indexing | `npm run embed` reads `src/assets/docs`, writes `src/assets/vector-db` |
+| Retrieval | Question embedded, nearest chunks returned by distance |
+| Generation | The retrieved chunks become the context of the prompt |
+| Backend | Express and TypeScript |
+| Frontend | React and Vite, asks and displays |
+| Library | LlamaIndex with OpenAI embeddings |
 
-Embedding turns text into a list of numbers positioned so that similar meanings sit close together. Finding relevant text then becomes a distance calculation rather than a keyword match, which is why a question phrased differently from the document still finds it.
+## Contents
 
-## Structure
+- [Overview](#overview)
+- [Features](#features)
+- [Technology](#technology)
+- [Project structure](#project-structure)
+- [Running it](#running-it)
+- [Notes](#notes)
+
+## Features
+
+### Answers grounded in your documents
+
+The model is given the passages that matched, so the answer comes from the source rather than from memory. Ask about something that is not in the documents and it has nothing to draw on.
+
+### Meaning, not keywords
+
+Embedding turns text into a list of numbers positioned so that similar meanings sit close together. Finding relevant text becomes a distance calculation, which is why a question worded differently from the document still finds it.
+
+### Indexing is a separate step
+
+Building the vector store is slow and costs tokens, so it runs once with `npm run embed` and not on every question. Change the documents and run it again.
+
+### A generated store, not a committed one
+
+`src/assets/vector-db` is produced from the documents and stays out of the repository. The documents are the source of truth.
+
+## Technology
+
+<p align="center">
+  <img src="./docs/tech-strip.svg" alt="RAG technologies" width="100%" />
+</p>
+
+| Technology | Role |
+|---|---|
+| LlamaIndex | Chunking, embedding and the vector store |
+| OpenAI | Embeddings and the answer |
+| TypeScript | Backend and frontend |
+| Node.js + Express | The API |
+| Axios | HTTP client |
+| React + Vite | The client |
+
+## Project structure
 
 ```text
-backend/
-|-- src/ai/          indexing and retrieval
-|-- src/assets/
-|   |-- docs/            the source documents
-|   `-- vector-db/       generated, not committed
-`-- src/controllers/
-frontend/            asks the question, shows the answer
+RAG/
+|-- backend/
+|   |-- src/ai/              indexing and retrieval
+|   |-- src/assets/
+|   |   |-- docs/            the source documents
+|   |   `-- vector-db/       generated by npm run embed, not committed
+|   |-- src/controllers/
+|   `-- src/services/
+|-- frontend/                asks the question, shows the answer
+`-- docs/                    README artwork only
 ```
 
 ## Running it
@@ -81,16 +131,22 @@ Copy `.env.example` to `.env` and fill in your own values:
 OPENAI_API_KEY=your_openai_api_key
 ```
 
-`.env` is ignored by git. Never commit real keys.
+`.env` is ignored by git. A key that reaches GitHub is public from the moment it is pushed.
 
----
+## Notes
+
+- `npm run embed` has to run before the first question. Without a vector store there is nothing to retrieve, and the answer route fails rather than guessing.
+- Re-run it after changing anything under `src/assets/docs`. The store is a snapshot, not a live view.
+- How many chunks are retrieved is a trade-off: too few and the answer misses context, too many and the important passage is diluted.
+
+## Author
 
 <p align="center">
   <strong>Itay Goldenberg</strong><br />
-  <sub>John Bryce Full Stack Development</sub>
+  <sub>Full Stack Developer Student &middot; John Bryce</sub>
 </p>
 
 <p align="center">
-  <a href="https://github.com/itaygoldenberg">GitHub</a> &middot;
-  <a href="https://www.linkedin.com/in/itay-goldenberg/">LinkedIn</a>
+  <a href="https://github.com/itaygoldenberg"><img src="./docs/actions/github.svg" alt="Itay Goldenberg on GitHub" width="250" /></a>
+  <a href="https://www.linkedin.com/in/itay-goldenberg/"><img src="./docs/actions/linkedin.svg" alt="Itay Goldenberg on LinkedIn" width="250" /></a>
 </p>
